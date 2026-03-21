@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'name',
+        'price',
+        'condition',
+        'description',
+        'image',
+        'status',
+        'stock',
+        'location'
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
+
+    // Relasi ke user (pemilik produk)
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke kategori
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    // Relasi ke images produk (multiple images)
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    // Relasi ke item keranjang
+    public function cartItems(): HasMany
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    // Relasi ke item pesanan
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    // Relasi ke review produk
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    // Fungsi untuk menghitung rating rata-rata
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?: 0;
+    }
+
+    // Fungsi untuk menghitung jumlah review
+    public function getReviewCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+}
